@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.venv\\\\Scripts\\\\python.exe -c \"import jose; print\\('jose ok'\\)\")",
+      "Bash(.venv\\\\Scripts\\\\python.exe -c \"import passlib; print\\('passlib ok'\\)\")",
+      "Bash(.venv\\\\Scripts\\\\python.exe -c \"import jwt; print\\('jwt ok'\\)\")"
+    ]
+  }
+}
