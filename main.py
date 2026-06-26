@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from db.database import Base, engine
 from models import *
 from middleware import RateLimitMiddleware
@@ -14,6 +15,8 @@ from routers import (
     doctors_router,
     patients_router,
     anketa_router,
+    dp_chat_router,
+    nurses_router,
 )
 
 Base.metadata.create_all(bind=engine)
@@ -53,6 +56,12 @@ app.include_router(patients_router)
 app.include_router(chat_router)
 app.include_router(anketa_router)
 app.include_router(diagnostic_router)
+app.include_router(dp_chat_router)
+app.include_router(nurses_router)
+
+import os
+os.makedirs("uploads/chat", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 if __name__ == "__main__":
     import uvicorn

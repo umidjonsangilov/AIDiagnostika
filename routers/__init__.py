@@ -7,3 +7,5 @@ from .clinics import router as clinics_router
 from .doctors import router as doctors_router
 from .patients import router as patients_router
 from .anketa import router as anketa_router
+from .doctor_patient_chat import router as dp_chat_router
+from .nurses import router as nurses_router

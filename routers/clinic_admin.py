@@ -1,3 +1,4 @@
+import secrets
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from db.database import get_db
@@ -5,7 +6,8 @@ from models.clinic import Clinic
 from models.clinic_admin import ClinicAdmin
 from models.doctors import Doctor
 from models.patients import Patient
-from schemas.schemas import DoctorCreate, DoctorResponse, ClinicUpdate, ClinicResponse, PatientResponse
+from models.nurse import Nurse
+from schemas.schemas import DoctorCreate, DoctorResponse, ClinicUpdate, ClinicResponse, PatientResponse, NurseCreate, NurseResponse
 from utils.auth import get_current_clinic_admin, hash_password
 
 router = APIRouter(prefix="/clinic-admin", tags=["clinic-admin"])
@@ -69,3 +71,39 @@ def list_patients(
     admin: ClinicAdmin = Depends(get_current_clinic_admin),
 ):
     return db.query(Patient).filter(Patient.clinic_id == admin.clinic_id).all()
+
+
+@router.post("/nurses", response_model=NurseResponse, status_code=status.HTTP_201_CREATED)
+def create_nurse(
+    body: NurseCreate,
+    db: Session = Depends(get_db),
+    admin: ClinicAdmin = Depends(get_current_clinic_admin),
+):
+    if db.query(Nurse).filter(Nurse.email == body.email).first():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu email allaqachon mavjud")
+
+    # Noyob doimiy taklif kodi (8 bayt = 16 hex belgi)
+    code = secrets.token_hex(8).upper()
+    while db.query(Nurse).filter(Nurse.referral_code == code).first():
+        code = secrets.token_hex(8).upper()
+
+    nurse = Nurse(
+        clinic_id=admin.clinic_id,
+        full_name=body.full_name,
+        email=body.email,
+        phone=body.phone,
+        hashed_password=hash_password(body.password),
+        referral_code=code,
+    )
+    db.add(nurse)
+    db.commit()
+    db.refresh(nurse)
+    return nurse
+
+
+@router.get("/nurses", response_model=list[NurseResponse])
+def list_nurses(
+    db: Session = Depends(get_db),
+    admin: ClinicAdmin = Depends(get_current_clinic_admin),
+):
+    return db.query(Nurse).filter(Nurse.clinic_id == admin.clinic_id).all()

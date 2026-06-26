@@ -5,6 +5,7 @@ from models.doctors import Doctor
 from models.patients import Patient
 from models.clinic_admin import ClinicAdmin
 from models.clinic import Clinic
+from models.nurse import Nurse
 from pydantic import BaseModel
 from schemas.schemas import LoginRequest, TokenResponse, PatientRegister
 from utils.auth import verify_password, create_access_token, hash_password
@@ -54,19 +55,37 @@ def patient_login(body: LoginRequest, db: Session = Depends(get_db)):
     return {"access_token": token}
 
 
+@router.post("/nurse/login", response_model=TokenResponse)
+def nurse_login(body: LoginRequest, db: Session = Depends(get_db)):
+    nurse = db.query(Nurse).filter(Nurse.email == body.email).first()
+    if not nurse or not verify_password(body.password, nurse.hashed_password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email yoki parol noto'g'ri")
+    token = create_access_token({"sub": nurse.id, "role": "nurse", "clinic_id": nurse.clinic_id})
+    return {"access_token": token}
+
+
 @router.post("/patient/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 def patient_register(body: PatientRegister, db: Session = Depends(get_db)):
     if db.query(Patient).filter(Patient.email == body.email).first():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu email allaqachon ro'yxatdan o'tgan")
 
-    clinic_id = body.clinic_id
+    clinic_id        = body.clinic_id
+    nurse_id         = None
 
-    # Klinika tanlanmagan bo'lsa — koordinata bo'yicha eng yaqinini topamiz
+    # 1-ustuvorlik: referral kodi
+    if body.referral_code:
+        nurse = db.query(Nurse).filter(Nurse.referral_code == body.referral_code).first()
+        if not nurse:
+            raise HTTPException(status_code=400, detail="Taklif kodi noto'g'ri")
+        clinic_id = nurse.clinic_id
+        nurse_id  = nurse.id
+
+    # 2-ustuvorlik: clinic_id yo'q bo'lsa — koordinata bo'yicha
     if clinic_id is None:
         if body.latitude is None or body.longitude is None:
             raise HTTPException(
                 status_code=400,
-                detail="clinic_id yoki koordinatalar (latitude, longitude) kerak"
+                detail="referral_code, clinic_id yoki koordinatalar (latitude, longitude) kerak"
             )
         clinics = db.query(Clinic).all()
         closest = nearest_clinic(body.latitude, body.longitude, clinics)
@@ -83,8 +102,16 @@ def patient_register(body: PatientRegister, db: Session = Depends(get_db)):
         hashed_password=hash_password(body.password),
         latitude=body.latitude,
         longitude=body.longitude,
+        referred_by_nurse_id=nurse_id,
     )
     db.add(patient)
+    db.flush()   # patient.id ni olish uchun
+
+    # Referral logiga yozish
+    if nurse_id:
+        from models.referral import Referral
+        db.add(Referral(nurse_id=nurse_id, patient_id=patient.id))
+
     db.commit()
     db.refresh(patient)
     token = create_access_token({"sub": patient.id, "role": "patient"})

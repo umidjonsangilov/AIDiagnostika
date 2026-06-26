@@ -13,6 +13,7 @@ superadmin_scheme   = OAuth2PasswordBearer(tokenUrl="/auth/superadmin/login",   
 clinic_admin_scheme = OAuth2PasswordBearer(tokenUrl="/auth/clinic-admin/login",  scheme_name="ClinicAdminBearer")
 doctor_scheme       = OAuth2PasswordBearer(tokenUrl="/auth/doctor/login",        scheme_name="DoctorBearer")
 patient_scheme      = OAuth2PasswordBearer(tokenUrl="/auth/patient/login",       scheme_name="PatientBearer")
+nurse_scheme        = OAuth2PasswordBearer(tokenUrl="/auth/nurse/login",         scheme_name="NurseBearer")
 
 
 def hash_password(password: str) -> str:
@@ -70,3 +71,12 @@ def get_current_patient(token: str = Depends(patient_scheme), db: Session = Depe
     if not patient:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Bemor topilmadi")
     return patient
+
+
+def get_current_nurse(token: str = Depends(nurse_scheme), db: Session = Depends(get_db)):
+    from models.nurse import Nurse
+    payload = _decode(token, "nurse")
+    nurse = db.query(Nurse).filter(Nurse.id == payload["sub"]).first()
+    if not nurse:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Hamshira topilmadi")
+    return nurse

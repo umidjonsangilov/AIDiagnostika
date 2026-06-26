@@ -123,6 +123,38 @@ class DoctorResponse(BaseModel):
         from_attributes = True
 
 
+# ── Nurse ─────────────────────────────────────────────────────────────────────
+
+class NurseCreate(BaseModel):
+    full_name: str
+    email: EmailStr
+    phone: Optional[str] = None
+    password: str
+
+
+class NurseResponse(BaseModel):
+    id: int
+    clinic_id: int
+    full_name: str
+    email: str
+    phone: Optional[str]
+    referral_code: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ReferralResponse(BaseModel):
+    id: int
+    nurse_id: int
+    patient_id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
 # ── Patient ───────────────────────────────────────────────────────────────────
 
 class PatientRegister(BaseModel):
@@ -131,9 +163,10 @@ class PatientRegister(BaseModel):
     password: str
     phone: Optional[str] = None
     date_of_birth: Optional[date] = None
-    clinic_id: Optional[int] = None       # None bo'lsa — koordinata bo'yicha aniqlanadi
+    clinic_id: Optional[int] = None       # None bo'lsa — koordinata yoki referral code orqali aniqlanadi
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    referral_code: Optional[str] = None   # Hamshira taklif kodi
 
 
 class PatientCreate(BaseModel):           # Klinika admin tomonidan yaratish
@@ -158,6 +191,7 @@ class PatientResponse(BaseModel):
     phone: Optional[str]
     date_of_birth: Optional[date]
     clinic_id: int
+    referred_by_nurse_id: Optional[int]
     created_at: datetime
 
     class Config:
