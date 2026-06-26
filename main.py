@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from db.database import Base, engine
 from models import *
+from middleware import RateLimitMiddleware
 from routers import (
     diagnostic_router,
     chat_router,
@@ -32,6 +33,8 @@ origins = [
     "http://localhost:5179",
     "http://localhost:5180"
     ]
+
+app.add_middleware(RateLimitMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
