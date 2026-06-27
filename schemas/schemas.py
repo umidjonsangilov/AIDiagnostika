@@ -96,7 +96,7 @@ class SystemAdminCreate(BaseModel):
 class SystemAdminResponse(BaseModel):
     id: int
     full_name: str
-    username: str
+    username: Optional[str]
     email: Optional[str]
     phone: Optional[str]
     created_at: datetime
@@ -146,7 +146,7 @@ class ClinicAdminResponse(BaseModel):
     id: int
     clinic_id: int
     full_name: str
-    username: str
+    username: Optional[str]
     email: Optional[str]
     phone: Optional[str]
     is_assistant: bool
@@ -171,7 +171,7 @@ class DoctorResponse(BaseModel):
     id: int
     clinic_id: int
     full_name: str
-    username: str
+    username: Optional[str]
     specialization: str
     email: Optional[str]
     phone: Optional[str]
@@ -195,7 +195,7 @@ class NurseResponse(BaseModel):
     id: int
     clinic_id: int
     full_name: str
-    username: str
+    username: Optional[str]
     email: Optional[str]
     phone: Optional[str]
     referral_code: str
