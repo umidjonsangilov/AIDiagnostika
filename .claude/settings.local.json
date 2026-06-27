@@ -3,7 +3,15 @@
     "allow": [
       "Bash(.venv\\\\Scripts\\\\python.exe -c \"import jose; print\\('jose ok'\\)\")",
       "Bash(.venv\\\\Scripts\\\\python.exe -c \"import passlib; print\\('passlib ok'\\)\")",
-      "Bash(.venv\\\\Scripts\\\\python.exe -c \"import jwt; print\\('jwt ok'\\)\")"
+      "Bash(.venv\\\\Scripts\\\\python.exe -c \"import jwt; print\\('jwt ok'\\)\")",
+      "Bash(curl -s -X POST https://aidiagnostikapi.sangilov.uz/auth/system-admin/login -H 'Content-Type: application/json' -d '{\"username\": \"Pistonchi\", \"password\": \"Ih84c36$yi2H9G#&\"}')",
+      "Bash(curl -s -X GET https://aidiagnostikapi.sangilov.uz/system-admin/clinics -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJzeXN0ZW1fYWRtaW4iLCJleHAiOjE3ODI2NDcyMDJ9.7ehAO3BlQ0dH9WkbHrXTg0gmIgQvkDR_XLfu4sN9lJs')",
+      "Bash(python -c ' *)",
+      "Bash(python3 -c ' *)",
+      "PowerShell(& \"f:\\\\programming\\\\python\\\\hakaton\\\\AIDiagnostika\\\\.venv\\\\Scripts\\\\python.exe\" \"C:\\\\Users\\\\Umidjon\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\f--programming-python-hakaton-AIDiagnostika\\\\3dc6f7aa-5e59-445b-9497-98d2b61e2f17\\\\scratchpad\\\\test_jwt.py\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
