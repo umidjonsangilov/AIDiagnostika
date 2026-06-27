@@ -34,7 +34,8 @@ def create_access_token(data: dict) -> str:
 
 def _decode(token: str, expected_role: str) -> dict:
     try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM],
+                             options={"verify_sub": False})
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Token noto'g'ri yoki muddati o'tgan",
@@ -56,7 +57,7 @@ def get_current_system_admin(
 ):
     from models.system_admin import SystemAdmin
     payload = _decode(credentials.credentials, "system_admin")
-    admin = db.query(SystemAdmin).filter(SystemAdmin.id == payload["sub"]).first()
+    admin = db.query(SystemAdmin).filter(SystemAdmin.id == int(payload["sub"])).first()
     if not admin:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Tizim admini topilmadi")
     return admin
@@ -68,7 +69,7 @@ def get_current_clinic_admin(
 ):
     from models.clinic_admin import ClinicAdmin
     payload = _decode(credentials.credentials, "clinic_admin")
-    admin = db.query(ClinicAdmin).filter(ClinicAdmin.id == payload["sub"]).first()
+    admin = db.query(ClinicAdmin).filter(ClinicAdmin.id == int(payload["sub"])).first()
     if not admin:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin topilmadi")
     return admin
@@ -80,7 +81,7 @@ def get_current_main_clinic_admin(
 ):
     from models.clinic_admin import ClinicAdmin
     payload = _decode(credentials.credentials, "clinic_admin")
-    admin = db.query(ClinicAdmin).filter(ClinicAdmin.id == payload["sub"]).first()
+    admin = db.query(ClinicAdmin).filter(ClinicAdmin.id == int(payload["sub"])).first()
     if not admin:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin topilmadi")
     if admin.is_assistant:
@@ -94,7 +95,7 @@ def get_current_doctor(
 ):
     from models.doctors import Doctor
     payload = _decode(credentials.credentials, "doctor")
-    doctor = db.query(Doctor).filter(Doctor.id == payload["sub"]).first()
+    doctor = db.query(Doctor).filter(Doctor.id == int(payload["sub"])).first()
     if not doctor:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Doktor topilmadi")
     return doctor
@@ -106,7 +107,7 @@ def get_current_patient(
 ):
     from models.patients import Patient
     payload = _decode(credentials.credentials, "patient")
-    patient = db.query(Patient).filter(Patient.id == payload["sub"]).first()
+    patient = db.query(Patient).filter(Patient.id == int(payload["sub"])).first()
     if not patient:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Bemor topilmadi")
     return patient
@@ -118,7 +119,7 @@ def get_current_nurse(
 ):
     from models.nurse import Nurse
     payload = _decode(credentials.credentials, "nurse")
-    nurse = db.query(Nurse).filter(Nurse.id == payload["sub"]).first()
+    nurse = db.query(Nurse).filter(Nurse.id == int(payload["sub"])).first()
     if not nurse:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Hamshira topilmadi")
     return nurse

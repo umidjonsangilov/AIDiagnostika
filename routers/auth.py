@@ -19,7 +19,7 @@ def system_admin_login(body: UsernameLoginRequest, db: Session = Depends(get_db)
     admin = db.query(SystemAdmin).filter(SystemAdmin.username == body.username).first()
     if not admin or not verify_password(body.password, admin.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Username yoki parol noto'g'ri")
-    token = create_access_token({"sub": admin.id, "role": "system_admin"})
+    token = create_access_token({"sub": str(admin.id), "role": "system_admin"})
     return {"access_token": token}
 
 
@@ -28,7 +28,7 @@ def clinic_admin_login(body: UsernameLoginRequest, db: Session = Depends(get_db)
     admin = db.query(ClinicAdmin).filter(ClinicAdmin.username == body.username).first()
     if not admin or not verify_password(body.password, admin.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Username yoki parol noto'g'ri")
-    token = create_access_token({"sub": admin.id, "role": "clinic_admin", "clinic_id": admin.clinic_id})
+    token = create_access_token({"sub": str(admin.id), "role": "clinic_admin", "clinic_id": admin.clinic_id})
     return {"access_token": token}
 
 
@@ -37,7 +37,7 @@ def doctor_login(body: UsernameLoginRequest, db: Session = Depends(get_db)):
     doctor = db.query(Doctor).filter(Doctor.username == body.username).first()
     if not doctor or not verify_password(body.password, doctor.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Username yoki parol noto'g'ri")
-    token = create_access_token({"sub": doctor.id, "role": "doctor", "clinic_id": doctor.clinic_id})
+    token = create_access_token({"sub": str(doctor.id), "role": "doctor", "clinic_id": doctor.clinic_id})
     return {"access_token": token}
 
 
@@ -46,7 +46,7 @@ def patient_login(body: PhoneLoginRequest, db: Session = Depends(get_db)):
     patient = db.query(Patient).filter(Patient.phone == body.phone).first()
     if not patient or not patient.hashed_password or not verify_password(body.password, patient.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Telefon yoki parol noto'g'ri")
-    token = create_access_token({"sub": patient.id, "role": "patient"})
+    token = create_access_token({"sub": str(patient.id), "role": "patient"})
     return {"access_token": token}
 
 
@@ -55,7 +55,7 @@ def nurse_login(body: UsernameLoginRequest, db: Session = Depends(get_db)):
     nurse = db.query(Nurse).filter(Nurse.username == body.username).first()
     if not nurse or not verify_password(body.password, nurse.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Username yoki parol noto'g'ri")
-    token = create_access_token({"sub": nurse.id, "role": "nurse", "clinic_id": nurse.clinic_id})
+    token = create_access_token({"sub": str(nurse.id), "role": "nurse", "clinic_id": nurse.clinic_id})
     return {"access_token": token}
 
 
@@ -94,5 +94,5 @@ def patient_register(body: PatientRegister, db: Session = Depends(get_db)):
 
     db.commit()
     db.refresh(patient)
-    token = create_access_token({"sub": patient.id, "role": "patient"})
+    token = create_access_token({"sub": str(patient.id), "role": "patient"})
     return {"access_token": token}
