@@ -69,29 +69,20 @@ def patient_register(body: PatientRegister, db: Session = Depends(get_db)):
     if db.query(Patient).filter(Patient.email == body.email).first():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu email allaqachon ro'yxatdan o'tgan")
 
-    clinic_id        = body.clinic_id
-    nurse_id         = None
+    clinic_id = body.clinic_id
+    nurse_id  = None
 
-    # 1-ustuvorlik: referral kodi
     if body.referral_code:
         nurse = db.query(Nurse).filter(Nurse.referral_code == body.referral_code).first()
         if not nurse:
             raise HTTPException(status_code=400, detail="Taklif kodi noto'g'ri")
         clinic_id = nurse.clinic_id
         nurse_id  = nurse.id
-
-    # 2-ustuvorlik: clinic_id yo'q bo'lsa — koordinata bo'yicha
-    if clinic_id is None:
-        if body.latitude is None or body.longitude is None:
-            raise HTTPException(
-                status_code=400,
-                detail="referral_code, clinic_id yoki koordinatalar (latitude, longitude) kerak"
-            )
+    elif clinic_id is None and body.latitude is not None and body.longitude is not None:
         clinics = db.query(Clinic).all()
         closest = nearest_clinic(body.latitude, body.longitude, clinics)
-        if not closest:
-            raise HTTPException(status_code=404, detail="Hech qanday klinika topilmadi")
-        clinic_id = closest.id
+        if closest:
+            clinic_id = closest.id
 
     patient = Patient(
         clinic_id=clinic_id,
@@ -105,9 +96,8 @@ def patient_register(body: PatientRegister, db: Session = Depends(get_db)):
         referred_by_nurse_id=nurse_id,
     )
     db.add(patient)
-    db.flush()   # patient.id ni olish uchun
+    db.flush()
 
-    # Referral logiga yozish
     if nurse_id:
         from models.referral import Referral
         db.add(Referral(nurse_id=nurse_id, patient_id=patient.id))

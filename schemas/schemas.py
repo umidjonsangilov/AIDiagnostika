@@ -190,7 +190,7 @@ class PatientResponse(BaseModel):
     email: str
     phone: Optional[str]
     date_of_birth: Optional[date]
-    clinic_id: int
+    clinic_id: Optional[int]
     referred_by_nurse_id: Optional[int]
     created_at: datetime
 

@@ -5,7 +5,7 @@ from .base import BaseTable
 class Patient(BaseTable):
     __tablename__ = "patients"
 
-    clinic_id            = Column(Integer, ForeignKey("clinics.id"), nullable=False, index=True)
+    clinic_id            = Column(Integer, ForeignKey("clinics.id"), nullable=True, index=True)
     full_name            = Column(String(150), nullable=False)
     date_of_birth        = Column(Date, nullable=True)
     email                = Column(String(255), unique=True, nullable=False)
