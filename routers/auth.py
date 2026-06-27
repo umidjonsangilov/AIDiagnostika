@@ -61,8 +61,10 @@ def nurse_login(body: UsernameLoginRequest, db: Session = Depends(get_db)):
 
 @router.post("/patient/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 def patient_register(body: PatientRegister, db: Session = Depends(get_db)):
-    if db.query(Patient).filter(Patient.username == body.username).first():
+    if body.username and db.query(Patient).filter(Patient.username == body.username).first():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu username allaqachon band")
+    if db.query(Patient).filter(Patient.phone == body.phone).first():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu telefon raqam allaqachon ro'yxatdan o'tgan")
     if body.email and db.query(Patient).filter(Patient.email == body.email).first():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu email allaqachon ro'yxatdan o'tgan")
 
