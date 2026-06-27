@@ -10,6 +10,7 @@ from routers import (
     chat_router,
     auth_router,
     superadmin_router,
+    system_admin_router,
     clinic_admin_router,
     clinics_router,
     doctors_router,
@@ -49,6 +50,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(superadmin_router)
+app.include_router(system_admin_router)
 app.include_router(clinic_admin_router)
 app.include_router(clinics_router)
 app.include_router(doctors_router)

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from .base import BaseTable
 
 
@@ -10,3 +10,4 @@ class ClinicAdmin(BaseTable):
     email           = Column(String(255), unique=True, nullable=False)
     phone           = Column(String(20), nullable=True)
     hashed_password = Column(String(255), nullable=False)
+    is_assistant    = Column(Boolean, nullable=False, default=False)

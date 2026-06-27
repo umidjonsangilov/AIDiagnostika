@@ -4,6 +4,7 @@ from db.database import get_db
 from models.doctors import Doctor
 from models.patients import Patient
 from models.clinic_admin import ClinicAdmin
+from models.system_admin import SystemAdmin
 from models.clinic import Clinic
 from models.nurse import Nurse
 from pydantic import BaseModel
@@ -25,6 +26,15 @@ def superadmin_login(body: SuperAdminLoginRequest):
     if body.username != SUPERADMIN_LOGIN or body.password != SUPERADMIN_PASSWORD:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Noto'g'ri ma'lumotlar")
     token = create_access_token({"sub": 0, "role": "superadmin"})
+    return {"access_token": token}
+
+
+@router.post("/system-admin/login", response_model=TokenResponse)
+def system_admin_login(body: LoginRequest, db: Session = Depends(get_db)):
+    admin = db.query(SystemAdmin).filter(SystemAdmin.email == body.email).first()
+    if not admin or not verify_password(body.password, admin.hashed_password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email yoki parol noto'g'ri")
+    token = create_access_token({"sub": admin.id, "role": "system_admin"})
     return {"access_token": token}
 
 

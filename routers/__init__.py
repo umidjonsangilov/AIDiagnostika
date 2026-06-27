@@ -2,6 +2,7 @@ from .diagnostic import router as diagnostic_router
 from .chat import router as chat_router
 from .auth import router as auth_router
 from .superadmin import router as superadmin_router
+from .system_admin import router as system_admin_router
 from .clinic_admin import router as clinic_admin_router
 from .clinics import router as clinics_router
 from .doctors import router as doctors_router

@@ -7,8 +7,8 @@ from models.clinic_admin import ClinicAdmin
 from models.doctors import Doctor
 from models.patients import Patient
 from models.nurse import Nurse
-from schemas.schemas import DoctorCreate, DoctorResponse, ClinicUpdate, ClinicResponse, PatientResponse, NurseCreate, NurseResponse
-from utils.auth import get_current_clinic_admin, hash_password
+from schemas.schemas import DoctorCreate, DoctorResponse, ClinicUpdate, ClinicResponse, PatientResponse, NurseCreate, NurseResponse, AssistantAdminCreate, ClinicAdminResponse
+from utils.auth import get_current_clinic_admin, get_current_main_clinic_admin, hash_password
 
 router = APIRouter(prefix="/clinic-admin", tags=["clinic-admin"])
 
@@ -25,7 +25,7 @@ def get_my_clinic(
 def update_my_clinic(
     body: ClinicUpdate,
     db: Session = Depends(get_db),
-    admin: ClinicAdmin = Depends(get_current_clinic_admin),
+    admin: ClinicAdmin = Depends(get_current_main_clinic_admin),
 ):
     clinic = db.query(Clinic).filter(Clinic.id == admin.clinic_id).first()
     for field, value in body.model_dump(exclude_none=True).items():
@@ -107,3 +107,36 @@ def list_nurses(
     admin: ClinicAdmin = Depends(get_current_clinic_admin),
 ):
     return db.query(Nurse).filter(Nurse.clinic_id == admin.clinic_id).all()
+
+
+@router.post("/assistants", response_model=ClinicAdminResponse, status_code=status.HTTP_201_CREATED)
+def create_assistant_admin(
+    body: AssistantAdminCreate,
+    db: Session = Depends(get_db),
+    admin: ClinicAdmin = Depends(get_current_main_clinic_admin),
+):
+    if db.query(ClinicAdmin).filter(ClinicAdmin.email == body.email).first():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu email allaqachon mavjud")
+    assistant = ClinicAdmin(
+        clinic_id=admin.clinic_id,
+        full_name=body.full_name,
+        email=body.email,
+        phone=body.phone,
+        hashed_password=hash_password(body.password),
+        is_assistant=True,
+    )
+    db.add(assistant)
+    db.commit()
+    db.refresh(assistant)
+    return assistant
+
+
+@router.get("/assistants", response_model=list[ClinicAdminResponse])
+def list_assistant_admins(
+    db: Session = Depends(get_db),
+    admin: ClinicAdmin = Depends(get_current_main_clinic_admin),
+):
+    return db.query(ClinicAdmin).filter(
+        ClinicAdmin.clinic_id == admin.clinic_id,
+        ClinicAdmin.is_assistant == True,
+    ).all()

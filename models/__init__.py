@@ -1,5 +1,6 @@
 from .clinic import Clinic
 from .clinic_admin import ClinicAdmin
+from .system_admin import SystemAdmin
 from .doctors import Doctor
 from .patients import Patient
 from .chats import Message
@@ -10,6 +11,6 @@ from .nurse import Nurse
 from .referral import Referral
 
 __all__ = [
-    "Clinic", "ClinicAdmin", "Doctor", "Patient", "Message",
+    "Clinic", "ClinicAdmin", "SystemAdmin", "Doctor", "Patient", "Message",
     "Anketa", "PredictionRecord", "DoctorPatientMessage", "Nurse", "Referral",
 ]

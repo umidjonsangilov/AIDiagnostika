@@ -9,11 +9,12 @@ from data.config import JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRE_MINUTES
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-superadmin_scheme   = OAuth2PasswordBearer(tokenUrl="/auth/superadmin/login",   scheme_name="SuperAdminBearer")
-clinic_admin_scheme = OAuth2PasswordBearer(tokenUrl="/auth/clinic-admin/login",  scheme_name="ClinicAdminBearer")
-doctor_scheme       = OAuth2PasswordBearer(tokenUrl="/auth/doctor/login",        scheme_name="DoctorBearer")
-patient_scheme      = OAuth2PasswordBearer(tokenUrl="/auth/patient/login",       scheme_name="PatientBearer")
-nurse_scheme        = OAuth2PasswordBearer(tokenUrl="/auth/nurse/login",         scheme_name="NurseBearer")
+superadmin_scheme    = OAuth2PasswordBearer(tokenUrl="/auth/superadmin/login",    scheme_name="SuperAdminBearer")
+system_admin_scheme  = OAuth2PasswordBearer(tokenUrl="/auth/system-admin/login",  scheme_name="SystemAdminBearer")
+clinic_admin_scheme  = OAuth2PasswordBearer(tokenUrl="/auth/clinic-admin/login",  scheme_name="ClinicAdminBearer")
+doctor_scheme        = OAuth2PasswordBearer(tokenUrl="/auth/doctor/login",        scheme_name="DoctorBearer")
+patient_scheme       = OAuth2PasswordBearer(tokenUrl="/auth/patient/login",       scheme_name="PatientBearer")
+nurse_scheme         = OAuth2PasswordBearer(tokenUrl="/auth/nurse/login",         scheme_name="NurseBearer")
 
 
 def hash_password(password: str) -> str:
@@ -46,12 +47,28 @@ def get_current_superadmin(token: str = Depends(superadmin_scheme)):
     return _decode(token, "superadmin")
 
 
+def get_current_system_admin(token: str = Depends(system_admin_scheme), db: Session = Depends(get_db)):
+    from models.system_admin import SystemAdmin
+    payload = _decode(token, "system_admin")
+    admin = db.query(SystemAdmin).filter(SystemAdmin.id == payload["sub"]).first()
+    if not admin:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Tizim admini topilmadi")
+    return admin
+
+
 def get_current_clinic_admin(token: str = Depends(clinic_admin_scheme), db: Session = Depends(get_db)):
     from models.clinic_admin import ClinicAdmin
     payload = _decode(token, "clinic_admin")
     admin = db.query(ClinicAdmin).filter(ClinicAdmin.id == payload["sub"]).first()
     if not admin:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin topilmadi")
+    return admin
+
+
+def get_current_main_clinic_admin(token: str = Depends(clinic_admin_scheme), db: Session = Depends(get_db)):
+    admin = get_current_clinic_admin(token=token, db=db)
+    if admin.is_assistant:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Bu amal faqat asosiy admin uchun")
     return admin
 
 
