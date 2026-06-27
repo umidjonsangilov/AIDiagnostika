@@ -7,26 +7,11 @@ from models.clinic_admin import ClinicAdmin
 from models.system_admin import SystemAdmin
 from models.clinic import Clinic
 from models.nurse import Nurse
-from pydantic import BaseModel
 from schemas.schemas import LoginRequest, TokenResponse, PatientRegister
 from utils.auth import verify_password, create_access_token
 from utils.geo import nearest_clinic
-from data.config import SUPERADMIN_LOGIN, SUPERADMIN_PASSWORD
-
-
-class SuperAdminLoginRequest(BaseModel):
-    username: str
-    password: str
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-
-
-@router.post("/superadmin/login", response_model=TokenResponse)
-def superadmin_login(body: SuperAdminLoginRequest):
-    if body.username != SUPERADMIN_LOGIN or body.password != SUPERADMIN_PASSWORD:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Noto'g'ri ma'lumotlar")
-    token = create_access_token({"sub": 0, "role": "superadmin"})
-    return {"access_token": token}
 
 
 @router.post("/system-admin/login", response_model=TokenResponse)
@@ -76,7 +61,7 @@ def nurse_login(body: LoginRequest, db: Session = Depends(get_db)):
 
 @router.post("/patient/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 def patient_register(body: PatientRegister, db: Session = Depends(get_db)):
-    if db.query(Patient).filter(Patient.email == body.email).first():
+    if body.email and db.query(Patient).filter(Patient.email == body.email).first():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu email allaqachon ro'yxatdan o'tgan")
 
     clinic_id = None

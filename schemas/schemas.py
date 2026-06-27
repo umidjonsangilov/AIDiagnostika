@@ -205,7 +205,7 @@ class ReferralResponse(BaseModel):
 class PatientRegister(BaseModel):
     full_name: str
     phone: str
-    email: EmailStr
+    email: Optional[EmailStr] = None
     referral_code: Optional[str] = None
 
 

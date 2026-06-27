@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Header, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from db.database import get_db
@@ -9,7 +9,6 @@ from data.config import JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRE_MINUTES
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-superadmin_scheme    = OAuth2PasswordBearer(tokenUrl="/auth/superadmin/login",    scheme_name="SuperAdminBearer")
 system_admin_scheme  = OAuth2PasswordBearer(tokenUrl="/auth/system-admin/login",  scheme_name="SystemAdminBearer")
 clinic_admin_scheme  = OAuth2PasswordBearer(tokenUrl="/auth/clinic-admin/login",  scheme_name="ClinicAdminBearer")
 doctor_scheme        = OAuth2PasswordBearer(tokenUrl="/auth/doctor/login",        scheme_name="DoctorBearer")
@@ -43,8 +42,10 @@ def _decode(token: str, expected_role: str) -> dict:
     return payload
 
 
-def get_current_superadmin(token: str = Depends(superadmin_scheme)):
-    return _decode(token, "superadmin")
+def get_current_superadmin(x_token: str = Header(..., alias="X-Token")):
+    from data.config import SUPERADMIN_TOKEN
+    if x_token != SUPERADMIN_TOKEN:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Token noto'g'ri")
 
 
 def get_current_system_admin(token: str = Depends(system_admin_scheme), db: Session = Depends(get_db)):

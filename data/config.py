@@ -16,5 +16,4 @@ JWT_SECRET = getenv("JWT_SECRET", "change-me-in-production")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_MINUTES = 60 * 24  # 1 kun
 
-SUPERADMIN_LOGIN    = getenv("SUPERADMIN_LOGIN", "superadmin")
-SUPERADMIN_PASSWORD = getenv("SUPERADMIN_PASSWORD", "superadmin123")
+SUPERADMIN_TOKEN = getenv("SUPERADMIN_TOKEN", "change-me-superadmin-token")
