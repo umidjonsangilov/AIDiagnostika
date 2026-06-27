@@ -1,3 +1,5 @@
+import hashlib
+import base64
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -9,6 +11,11 @@ from data.config import JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRE_MINUTES
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
+def _prepare(password: str) -> str:
+    # bcrypt 72 bayt chegarasi bor; SHA-256 orqali har qanday uzunlik ishlaydi
+    return base64.b64encode(hashlib.sha256(password.encode()).digest()).decode()
+
 system_admin_scheme  = OAuth2PasswordBearer(tokenUrl="/auth/system-admin/login",  scheme_name="SystemAdminBearer")
 clinic_admin_scheme  = OAuth2PasswordBearer(tokenUrl="/auth/clinic-admin/login",  scheme_name="ClinicAdminBearer")
 doctor_scheme        = OAuth2PasswordBearer(tokenUrl="/auth/doctor/login",        scheme_name="DoctorBearer")
@@ -17,11 +24,11 @@ nurse_scheme         = OAuth2PasswordBearer(tokenUrl="/auth/nurse/login",       
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return pwd_context.hash(_prepare(password))
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    return pwd_context.verify(_prepare(plain), hashed)
 
 
 def create_access_token(data: dict) -> str:
