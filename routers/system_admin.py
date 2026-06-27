@@ -18,8 +18,8 @@ def create_clinic_with_admin(
     db: Session = Depends(get_db),
     _=Depends(get_current_system_admin),
 ):
-    if db.query(ClinicAdmin).filter(ClinicAdmin.email == body.admin_email).first():
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu admin email allaqachon mavjud")
+    if db.query(ClinicAdmin).filter(ClinicAdmin.username == body.admin_username).first():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu admin username allaqachon band")
 
     clinic = Clinic(
         name=body.clinic_name,
@@ -34,6 +34,7 @@ def create_clinic_with_admin(
     admin = ClinicAdmin(
         clinic_id=clinic.id,
         full_name=body.admin_full_name,
+        username=body.admin_username,
         email=body.admin_email,
         phone=body.admin_phone,
         hashed_password=hash_password(body.admin_password),

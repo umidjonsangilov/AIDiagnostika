@@ -7,6 +7,7 @@ class Patient(BaseTable):
 
     clinic_id            = Column(Integer, ForeignKey("clinics.id"), nullable=True, index=True)
     full_name            = Column(String(150), nullable=False)
+    username             = Column(String(100), unique=True, nullable=True)
     date_of_birth        = Column(Date, nullable=True)
     email                = Column(String(255), unique=True, nullable=True)
     phone                = Column(String(20), nullable=True)

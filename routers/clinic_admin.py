@@ -41,11 +41,12 @@ def create_doctor(
     db: Session = Depends(get_db),
     admin: ClinicAdmin = Depends(get_current_clinic_admin),
 ):
-    if db.query(Doctor).filter(Doctor.email == body.email).first():
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu email allaqachon mavjud")
+    if db.query(Doctor).filter(Doctor.username == body.username).first():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu username allaqachon band")
     doctor = Doctor(
         clinic_id=admin.clinic_id,
         full_name=body.full_name,
+        username=body.username,
         specialization=body.specialization,
         email=body.email,
         phone=body.phone,
@@ -79,10 +80,9 @@ def create_nurse(
     db: Session = Depends(get_db),
     admin: ClinicAdmin = Depends(get_current_clinic_admin),
 ):
-    if db.query(Nurse).filter(Nurse.email == body.email).first():
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu email allaqachon mavjud")
+    if db.query(Nurse).filter(Nurse.username == body.username).first():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu username allaqachon band")
 
-    # Noyob doimiy taklif kodi (8 bayt = 16 hex belgi)
     code = secrets.token_hex(8).upper()
     while db.query(Nurse).filter(Nurse.referral_code == code).first():
         code = secrets.token_hex(8).upper()
@@ -90,6 +90,7 @@ def create_nurse(
     nurse = Nurse(
         clinic_id=admin.clinic_id,
         full_name=body.full_name,
+        username=body.username,
         email=body.email,
         phone=body.phone,
         hashed_password=hash_password(body.password),
@@ -115,11 +116,12 @@ def create_assistant_admin(
     db: Session = Depends(get_db),
     admin: ClinicAdmin = Depends(get_current_main_clinic_admin),
 ):
-    if db.query(ClinicAdmin).filter(ClinicAdmin.email == body.email).first():
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu email allaqachon mavjud")
+    if db.query(ClinicAdmin).filter(ClinicAdmin.username == body.username).first():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu username allaqachon band")
     assistant = ClinicAdmin(
         clinic_id=admin.clinic_id,
         full_name=body.full_name,
+        username=body.username,
         email=body.email,
         phone=body.phone,
         hashed_password=hash_password(body.password),

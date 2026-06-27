@@ -37,8 +37,13 @@ class GradesResponse(BaseModel):
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
-class LoginRequest(BaseModel):
-    email: EmailStr
+class UsernameLoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class PhoneLoginRequest(BaseModel):
+    phone: str
     password: str
 
 
@@ -82,7 +87,8 @@ class ClinicResponse(BaseModel):
 
 class SystemAdminCreate(BaseModel):
     full_name: str
-    email: EmailStr
+    username: str
+    email: Optional[EmailStr] = None
     phone: Optional[str] = None
     password: str
 
@@ -90,7 +96,8 @@ class SystemAdminCreate(BaseModel):
 class SystemAdminResponse(BaseModel):
     id: int
     full_name: str
-    email: str
+    username: str
+    email: Optional[str]
     phone: Optional[str]
     created_at: datetime
 
@@ -105,7 +112,8 @@ class ClinicWithAdminCreate(BaseModel):
     clinic_latitude: Optional[float] = None
     clinic_longitude: Optional[float] = None
     admin_full_name: str
-    admin_email: EmailStr
+    admin_username: str
+    admin_email: Optional[EmailStr] = None
     admin_phone: Optional[str] = None
     admin_password: str
 
@@ -120,14 +128,16 @@ class ClinicWithAdminResponse(BaseModel):
 class ClinicAdminCreate(BaseModel):
     clinic_id: int
     full_name: str
-    email: EmailStr
+    username: str
+    email: Optional[EmailStr] = None
     phone: Optional[str] = None
     password: str
 
 
 class AssistantAdminCreate(BaseModel):
     full_name: str
-    email: EmailStr
+    username: str
+    email: Optional[EmailStr] = None
     phone: Optional[str] = None
     password: str
 
@@ -136,7 +146,8 @@ class ClinicAdminResponse(BaseModel):
     id: int
     clinic_id: int
     full_name: str
-    email: str
+    username: str
+    email: Optional[str]
     phone: Optional[str]
     is_assistant: bool
     created_at: datetime
@@ -149,8 +160,9 @@ class ClinicAdminResponse(BaseModel):
 
 class DoctorCreate(BaseModel):
     full_name: str
+    username: str
     specialization: str
-    email: EmailStr
+    email: Optional[EmailStr] = None
     phone: Optional[str] = None
     password: str
 
@@ -159,8 +171,9 @@ class DoctorResponse(BaseModel):
     id: int
     clinic_id: int
     full_name: str
+    username: str
     specialization: str
-    email: str
+    email: Optional[str]
     phone: Optional[str]
     created_at: datetime
 
@@ -172,7 +185,8 @@ class DoctorResponse(BaseModel):
 
 class NurseCreate(BaseModel):
     full_name: str
-    email: EmailStr
+    username: str
+    email: Optional[EmailStr] = None
     phone: Optional[str] = None
     password: str
 
@@ -181,7 +195,8 @@ class NurseResponse(BaseModel):
     id: int
     clinic_id: int
     full_name: str
-    email: str
+    username: str
+    email: Optional[str]
     phone: Optional[str]
     referral_code: str
     created_at: datetime
@@ -204,6 +219,7 @@ class ReferralResponse(BaseModel):
 
 class PatientRegister(BaseModel):
     full_name: str
+    username: str
     phone: str
     password: str
     email: Optional[EmailStr] = None
@@ -228,7 +244,8 @@ class PatientUpdate(BaseModel):
 class PatientResponse(BaseModel):
     id: int
     full_name: str
-    email: str
+    username: Optional[str]
+    email: Optional[str]
     phone: Optional[str]
     date_of_birth: Optional[date]
     clinic_id: Optional[int]

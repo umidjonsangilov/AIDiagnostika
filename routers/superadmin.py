@@ -14,10 +14,11 @@ def create_system_admin(
     db: Session = Depends(get_db),
     _=Depends(get_current_superadmin),
 ):
-    if db.query(SystemAdmin).filter(SystemAdmin.email == body.email).first():
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu email allaqachon mavjud")
+    if db.query(SystemAdmin).filter(SystemAdmin.username == body.username).first():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu username allaqachon band")
     admin = SystemAdmin(
         full_name=body.full_name,
+        username=body.username,
         email=body.email,
         phone=body.phone,
         hashed_password=hash_password(body.password),
