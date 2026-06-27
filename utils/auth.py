@@ -4,23 +4,18 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, Header, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from db.database import get_db
 from data.config import JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRE_MINUTES
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+_bearer = HTTPBearer(scheme_name="Bearer")
+
 
 def _prepare(password: str) -> str:
-    # bcrypt 72 bayt chegarasi bor; SHA-256 orqali har qanday uzunlik ishlaydi
     return base64.b64encode(hashlib.sha256(password.encode()).digest()).decode()
-
-system_admin_scheme  = OAuth2PasswordBearer(tokenUrl="/auth/system-admin/login",  scheme_name="SystemAdminBearer")
-clinic_admin_scheme  = OAuth2PasswordBearer(tokenUrl="/auth/clinic-admin/login",  scheme_name="ClinicAdminBearer")
-doctor_scheme        = OAuth2PasswordBearer(tokenUrl="/auth/doctor/login",        scheme_name="DoctorBearer")
-patient_scheme       = OAuth2PasswordBearer(tokenUrl="/auth/patient/login",       scheme_name="PatientBearer")
-nurse_scheme         = OAuth2PasswordBearer(tokenUrl="/auth/nurse/login",         scheme_name="NurseBearer")
 
 
 def hash_password(password: str) -> str:
@@ -55,52 +50,74 @@ def get_current_superadmin(x_token: str = Header(..., alias="X-Token")):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Token noto'g'ri")
 
 
-def get_current_system_admin(token: str = Depends(system_admin_scheme), db: Session = Depends(get_db)):
+def get_current_system_admin(
+    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
+    db: Session = Depends(get_db),
+):
     from models.system_admin import SystemAdmin
-    payload = _decode(token, "system_admin")
+    payload = _decode(credentials.credentials, "system_admin")
     admin = db.query(SystemAdmin).filter(SystemAdmin.id == payload["sub"]).first()
     if not admin:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Tizim admini topilmadi")
     return admin
 
 
-def get_current_clinic_admin(token: str = Depends(clinic_admin_scheme), db: Session = Depends(get_db)):
+def get_current_clinic_admin(
+    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
+    db: Session = Depends(get_db),
+):
     from models.clinic_admin import ClinicAdmin
-    payload = _decode(token, "clinic_admin")
+    payload = _decode(credentials.credentials, "clinic_admin")
     admin = db.query(ClinicAdmin).filter(ClinicAdmin.id == payload["sub"]).first()
     if not admin:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin topilmadi")
     return admin
 
 
-def get_current_main_clinic_admin(token: str = Depends(clinic_admin_scheme), db: Session = Depends(get_db)):
-    admin = get_current_clinic_admin(token=token, db=db)
+def get_current_main_clinic_admin(
+    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
+    db: Session = Depends(get_db),
+):
+    from models.clinic_admin import ClinicAdmin
+    payload = _decode(credentials.credentials, "clinic_admin")
+    admin = db.query(ClinicAdmin).filter(ClinicAdmin.id == payload["sub"]).first()
+    if not admin:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin topilmadi")
     if admin.is_assistant:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Bu amal faqat asosiy admin uchun")
     return admin
 
 
-def get_current_doctor(token: str = Depends(doctor_scheme), db: Session = Depends(get_db)):
+def get_current_doctor(
+    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
+    db: Session = Depends(get_db),
+):
     from models.doctors import Doctor
-    payload = _decode(token, "doctor")
+    payload = _decode(credentials.credentials, "doctor")
     doctor = db.query(Doctor).filter(Doctor.id == payload["sub"]).first()
     if not doctor:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Doktor topilmadi")
     return doctor
 
 
-def get_current_patient(token: str = Depends(patient_scheme), db: Session = Depends(get_db)):
+def get_current_patient(
+    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
+    db: Session = Depends(get_db),
+):
     from models.patients import Patient
-    payload = _decode(token, "patient")
+    payload = _decode(credentials.credentials, "patient")
     patient = db.query(Patient).filter(Patient.id == payload["sub"]).first()
     if not patient:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Bemor topilmadi")
     return patient
 
 
-def get_current_nurse(token: str = Depends(nurse_scheme), db: Session = Depends(get_db)):
+def get_current_nurse(
+    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
+    db: Session = Depends(get_db),
+):
     from models.nurse import Nurse
-    payload = _decode(token, "nurse")
+    payload = _decode(credentials.credentials, "nurse")
     nurse = db.query(Nurse).filter(Nurse.id == payload["sub"]).first()
     if not nurse:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Hamshira topilmadi")
