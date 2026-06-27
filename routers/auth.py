@@ -8,7 +8,7 @@ from models.system_admin import SystemAdmin
 from models.clinic import Clinic
 from models.nurse import Nurse
 from schemas.schemas import LoginRequest, TokenResponse, PatientRegister
-from utils.auth import verify_password, create_access_token
+from utils.auth import verify_password, create_access_token, hash_password
 from utils.geo import nearest_clinic
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -79,6 +79,7 @@ def patient_register(body: PatientRegister, db: Session = Depends(get_db)):
         full_name=body.full_name,
         phone=body.phone,
         email=body.email,
+        hashed_password=hash_password(body.password),
         referred_by_nurse_id=nurse_id,
     )
     db.add(patient)
