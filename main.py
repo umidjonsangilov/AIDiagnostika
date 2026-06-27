@@ -24,26 +24,11 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="AIDiagnostika API")
 
-origins = [
-    "http://localhost:5170",
-    "http://localhost:5171",
-    "http://localhost:5172",
-    "http://localhost:5173",
-    "http://localhost:5174",
-    "http://localhost:5175",
-    "http://localhost:5176",
-    "http://localhost:5177",
-    "http://localhost:5178",
-    "http://localhost:5179",
-    "http://localhost:5180"
-    ]
-
 app.add_middleware(RateLimitMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
