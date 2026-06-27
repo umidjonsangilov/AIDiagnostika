@@ -219,7 +219,7 @@ class ReferralResponse(BaseModel):
 
 class PatientRegister(BaseModel):
     full_name: str
-    username: str
+    username: Optional[str]
     phone: str
     password: str
     email: Optional[EmailStr] = None
