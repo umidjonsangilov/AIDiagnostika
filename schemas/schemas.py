@@ -159,14 +159,9 @@ class ReferralResponse(BaseModel):
 
 class PatientRegister(BaseModel):
     full_name: str
+    phone: str
     email: EmailStr
-    password: str
-    phone: Optional[str] = None
-    date_of_birth: Optional[date] = None
-    clinic_id: Optional[int] = None       # None bo'lsa — koordinata yoki referral code orqali aniqlanadi
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    referral_code: Optional[str] = None   # Hamshira taklif kodi
+    referral_code: Optional[str] = None
 
 
 class PatientCreate(BaseModel):           # Klinika admin tomonidan yaratish

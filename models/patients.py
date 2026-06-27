@@ -10,7 +10,7 @@ class Patient(BaseTable):
     date_of_birth        = Column(Date, nullable=True)
     email                = Column(String(255), unique=True, nullable=False)
     phone                = Column(String(20), nullable=True)
-    hashed_password      = Column(String(255), nullable=False)
+    hashed_password      = Column(String(255), nullable=True)
     latitude             = Column(Float, nullable=True)
     longitude            = Column(Float, nullable=True)
     referred_by_nurse_id = Column(Integer, ForeignKey("nurses.id"), nullable=True, index=True)
