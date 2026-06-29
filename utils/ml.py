@@ -38,6 +38,11 @@ def load_model():
         except Exception as e:
             raise RuntimeError(f"Modelni yuklab bo'lmadi: {e}")
 
+    # model.pkl ichida ishlatilgan custom funksiyalar pickle uchun mavjud bo'lishi kerak
+    import __main__
+    def get_x(r): return r
+    __main__.get_x = get_x
+
     _learner = load_learner(MODEL_PATH, cpu=True)
     print("Model muvaffaqiyatli yuklandi.")
 
