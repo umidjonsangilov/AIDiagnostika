@@ -38,12 +38,21 @@ def load_model():
         except Exception as e:
             raise RuntimeError(f"Modelni yuklab bo'lmadi: {e}")
 
-    # model.pkl ichida ishlatilgan custom funksiyalar pickle uchun mavjud bo'lishi kerak
-    import __main__
-    def get_x(r): return r
-    __main__.get_x = get_x
+    # model.pkl custom funksiyalarni __main__ dan izlaydi.
+    # DummyModule har qanday nomni so'raganda placeholder qaytaradi.
+    import sys, types
 
-    _learner = load_learner(MODEL_PATH, cpu=True)
+    class _DummyModule(types.ModuleType):
+        def __getattr__(self, _):
+            def _placeholder(*args): return args[0] if args else None
+            return _placeholder
+
+    _real_main = sys.modules["__main__"]
+    sys.modules["__main__"] = _DummyModule("__main__")
+    try:
+        _learner = load_learner(MODEL_PATH, cpu=True)
+    finally:
+        sys.modules["__main__"] = _real_main
     print("Model muvaffaqiyatli yuklandi.")
 
 
